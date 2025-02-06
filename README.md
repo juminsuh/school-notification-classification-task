@@ -42,16 +42,12 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 ### Machine Learning Model
 
----
-
 | Model | Random Forest | Multinomial Naive Bayes | Bernoulli Naive Bayes | Logistic Regression |
 | --- | --- | --- | --- | --- |
 | **Accuracy** | 0.9183 | 0.9008 | 0.9088 | 0.9321 |
 | **F1 Score** | 0.9183 | 0.9008 | 0.9088 | 0.9321 |
 
 ### Deep Learning Model
-
----
 
 ### Multilingual BERT
 
