@@ -1,67 +1,53 @@
 # school-notification-classification-task
 
-## Experiment Results
+## #01 Introduction 
 
+### 💡 The neccessity of the project
 
-|  klue/bert-base | multilingual-bert |  
-| --- | --- | --- |
-| Average Test Accuracy | 0.9217 | 0.9054 |  
-| Test F1 Score | 0.9032 | 0.8838 |  
+Users often find it difficult to quickly and accurately obtain the information they need due to ambiguous category boundaries in school announcements, such as academic affairs, career, and scholarships. In particular, the main user group of the school website—students—are primarily interested in announcements about activities that can enhance their career prospects and qualifications.
 
-## #01 프로젝트 소개
+➡️ To address this issue, we aim to build a classification model that categorizes announcements into two groups: those that contribute to building a resume (1) and those that do not (0).
 
-💡 프로젝트의 필요성 및 개요
+## #02 Data Crawling
 
-학교 공지사항에서 학사, 경력, 장학 등 카테고리의 경계가 모호하여 사용자 입장에서 원하는 정보를 빠르고 정확하게 얻지 못하는 점에서 불편을 느낌.
-
-특히, 홈페이지의 주 사용층인 학생의 주요 관심사는 **스펙을 쌓을 수 있는 활동에 대한 공지사항**임.
-
-➡️ 공지사항을 스펙이 되는 것(1)과 그렇지 않은 것(0)으로 분류할 수 있는 모델을 구축하고자 함.
-
-## #02 데이터 크롤링
-
-- title scrapping 함수를 정의 → BeautifulSoup 라이브러리를 사용해 원하는 페이지의 원하는 부분을 크롤링할 수 있음.
-- 홈페이지의 개발자 모드를 통해 스크래핑하고자 하는 부분이 어떤 태그, 어떤 클래스인지 확인 후 원하는 부분을 find 또는 find_all 메서드를 통해 크롤링할 수 있음.
-- 크롤링한 9782개의 train set과 976개의 test set을 모두 직접 라벨링함.
+Defined a title scraping function by using `BeautifulSoup` to extract specific sections of the target webpage. Inspected the website's developer mode to identify the relevant tags and classes for the data, then extracted the necessary content using the find or find_all methods. We labeled 9,782 training samples and 976 test samples manually after scraping.
 
 ## #03 EDA
 
-- 한글 폰트 (나눔 폰트 설치) - 설치 후 세션 다시 시작
-- 결측치 확인 & 중복 제거
-- class balance 확인: train data의 class imbalance는 smote / oversampling / undersampling과 같은 데이터 조작을 필요로 할 수 있기 때문에 확인해야 할 중요한 요소
-- title length 파악: 클래스에 따른 텍스트의 길이가 크게 다르지 않음을 확인함
-- word cloud로 클래스 별 어떤 단어가 dominant한 지 시각적으로 확인
+- Korean Font (Nanum Font) Installation
+- Check for Missing Values & Remove Duplicates
+- Check Class Balance: Since class imbalance in the training data may require data manipulation techniques such as SMOTE, oversampling, or undersampling, it is an important factor to examine.
+- Analyze Title Length: Verified that text lengths do not significantly differ across classes.
+- Visualize Dominant Words per Class Using a Word Cloud: Used a word cloud to visually identify which words are dominant in each class.
 
-## #04 전처리
+## #04 Preprocessing
 
-- 출현 빈도가 낮은 단어 제거: Counter()를 사용해 모든 단어의 출현 빈도 수를 딕셔너리에 저장, 이후 빈도 수가 3번 이하인 단어를 제거
-- 크롤링한 학교 명을 95% 제거 → 특정 학교명으로 학습되는 일을 방지
-- title에 영어와 한국어만 남기고 숫자, 괄호, 특수 문자는 모두 제거
-- custom words와 stop words 정의: ‘장학생’과 같은 하나의 단어이자 분류 테스크에서의 주요 키워드를 ‘장’, ‘학생’으로 잘못 인식하여 토큰화하는 경우 발생 → custom words를 정의해 사용자 지정 사전 제작
-- 한 글자는 drop하되 ‘팀’, ‘랩’과 같은 주요 키워드는 남겨두기
+- Removed 95% of crawled school names to prevents the model from overfitting to specific school names.
+  
+- Retained only English and Korean in titles, removing all numbers, parentheses, and special characters.
 
-## #05 모델링
+- Defined Custom Words and Stop Words to prevented incorrect tokenization of key terms. For example, the word **"장학생" (scholarship student)** was mistakenly split into **"장" (chapter) and "학생" (student)**. We created a **custom dictionary** and Komoran morphological parser to handle such cases properly.
+
+## #05 Modeling
 
 ### Embedding
 
 ---
 
-- n-gram vectorization: 단어의 앞뒤 맥락 정보를 더 잘 파악하기 위한 작업
-- Kobert Tokenizer: 한국어의 형태소 분석을 반영하여 더 의미 있는 임베딩을 형성할 수 있음.
-- high priority words: ‘프로그램’, ‘서포터즈’, ‘인턴’과 같이 분류에 있어 중요도가 높은 단어들을 포함하는 title을 1, 그렇지 않으면 0으로 설정한 뒤 machine learning model을 실행할 때 그 가중치를 높임.
+- N-gram Vectorization captures contextual information by considering the surrounding words.
 
-⇒ 최종적으로 임베딩 및 중요도를 높인 단어들의 특징을 X_combined 변수에 stacking
+- Utilize the last hidden state (embedding) obtained from KLUE-BERT-Base Tokenizer, which is a pre-trained model, to generate more meaningful embeddings.
+
+➡️ Finally, both embeddings are stacked into the `X_combined` variable, which is fed to machine learning models. 
 
 ### Machine Learning Model
 
 ---
 
-*acc 기준 
-
-|  | Random Forest | Multinomial Naive Bayes | Bernoulli Naive Bayes | Logistic Regression (ver. plain)  | Logistic Regression (ver. optimal hyperparameters with GridSearch) |
-| --- | --- | --- | --- | --- | --- |
-| 일반 버전 | 0.8456 | 0.8844 | 0.8942 | 0.7052 | 0.9131 |
-| 특정 단어 중요도 높인 버전  | 0.8456 | 0.8850 | 0.8942 | 0.7041 | 0.9131 |
+| Model | Random Forest | Multinomial Naive Bayes | Bernoulli Naive Bayes | Logistic Regression |
+| --- | --- | --- | --- | --- |
+| **Accuracy** | 0.9183 | 0.9008 | 0.9088 | 0.9321 |
+| **F1 Score** | 0.9183 | 0.9008 | 0.9088 | 0.9321 |
 
 ### Deep Learning Model
 
@@ -69,142 +55,17 @@
 
 ### Multilingual BERT
 
-- 다양한 단어로 이루어진 텍스트를 이해할 수 있도록 설계된 BERT → 일반화된 언어 표현을 학습
-- trained with self-supervised fashion (no ground-truth label)
-- Pretrained objectives
-    - Masked Language Modeling(MLM): randomly masks 15% of the input words → learn bidirectional represenation of word
-    - Next Sentence Prediction(NSP): concatenates two masked sentences → predict whether two sentences are successive or not
-- In this way, M-BERT learns an inner represenation of languages that can be useful in extracting features for each downstream task
+- Multilingual Bert (m-bert) is a pre-trained bert-based model which was trained to understand multiple languages and generalized language representations. It was trained with self-supervised fashion without any ground-truth labels. 
 
-### **Process**
+### KLUE-BERT-BASE
 
-1. title의 시작에 [CLS], 끝에 [SEP] 토큰을 붙임. [CLS]는 classification의 약자로, 문장의 시작에 붙임으로써 이 위치에서 특징 벡터를 추출하도록 모델에게 알림. [SEP]는 separator의 약자로, 문장의 끝에 붙임으로써 서로 다른 문장들을 구분함. 
-2. 문장의 단어를 tokenzing: tokenizer
-    
-    ```python
-    tokenizer = BertTokenizer.from_pretrained('bert-base-multillingual-cased', do_lower_case = False)
-    tokenized_X_train = [tokenizer.tokenize(fixed) for fixed in X_train_fixed]
-    tokenized_X_test = [tokenizer.tokenize(fixed) for fixed in X_test_fixed]
-    ```
-    
-3. token을 각각 대응하는 id로 나타냄
-4. pad sequence를 통해 시퀀스 데이터를 지정한 길이인 max_len으로 맞춰줌. 빈 부분은 0으로 패딩. 
-5. 문장의 attention mask를 만듦 - id가 존재하면 1.0, 0으로 패딩됐으면 0.0으로 mask를 만듦
-6. hyperparameter setting: 배치 사이즈, 에폭 수, learning rate scheduler 조절을 통해 최적의 accuracy를 가지는 hyperparameter를 찾음
+- KLUE (Korean Language Understanding Evaluation) is a collection of benchmarks for 8 Korean NLU tasks and KLUE-BERT-BASE (klue-bert-base) is a pre-trained model with KLUE benchmarks.
 
-| lr scheduler 사용 여부 | batch size | epochs | step size | gamma  | learning scheduler | learning rate | optimzier |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| o | 32 | 10 | 3 | 0.1 | StepLR | 3e-5 | AdamW |
-1. 10번의 에폭 동안 overfitting을 막기 위해 early stopping 기법 적용: eval loss가 세 번 동안이나 개선되지 않으면 overfitting이라고 판단하고 훈련 종료 → 7번의 epoch에서 훈련이 종료됨
-
-### KoBERT
-
-- 기존 BERT의 한국어 성능을 극복하기 위해 SKT Brain에서 개발한 모델
-- 위키피디아와 뉴스 등에서 수집한 수백만 개의 한국어 문장의 대규모 말뭉치(Corpus)를 통해 학습됨
-- output layer를 추가함으로써 언어 특화 모델을 customize할 수 있다는 장점 존재
-
-### **Process**
-
-1. Bert Classifier Architecture 정의: 
-2. get_cosine_schedule_with_warmup을 활용한 learning rate scheduling: 학습 초기 단계에서 학습율을 점진적으로 증가시키는 warming-up step을 적용한 후, cosine 형태로 학습율을 점차 감소시키는 방식 
-3. Layer-wise Learning Rate Decay(LLRD) 적용: 모델의 각 레이어마다 다른 학습율을 적용시키는 기법으로, 상위 레이어는 보다 구체적인 의미 / 테스크 특화 정보를 담고 있고 하위 레이어는 기본적은 문법, 어휘, 구조적 정보 등을 담고 있음. 따라서 하위 레이어에서는 작은 learning rate로 일반적이고 기본적인 구조를 학습한 상태를 유지하고 상위 레이어에서는 높은 learning rate로 테스크에 특화되도록 파라미터가 신속하게 업데이트되어야 함. → 하위 6개 layer는 learning rate로 0.1, 상위 6개 layer는 learning rate로 0.5를 가짐
-4. LLRD를 적용한 모델이 그렇지 않은 모델보다 outperformed
-
-## Hyperparameters Tuning
-
-# 파인튜닝 기록 - multilingual bert
-
-## 사용 모델
-
----
-
-[google-bert/bert-base-multilingual-cased · Hugging Face](https://huggingface.co/google-bert/bert-base-multilingual-cased)
-
-## 하이퍼파라미터 튜닝
-
----
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 2e-5 | 3 | 0.1 | 10 | 0.90020 | 32 |
-
-![image](https://github.com/user-attachments/assets/580654b7-0d71-4b9f-9223-7c1b828187f7)
-
-![image 1](https://github.com/user-attachments/assets/fff31a3c-4d10-4db1-b0cd-8fd1eecea6ad)
-
-BERT 공식 문서에서 시도한 하이퍼파라미터 참고 - 4 epoch
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 1e-4 | 3 | 0.1 | 4 | 0.87478 | 32 |
-
-![image 2](https://github.com/user-attachments/assets/9266cf69-ec2a-4b40-8f54-652cf72a26e1)
-
-초기 learning rate가 너무 컸던 것으로 예상. 또한 에폭이 4인데 step size가 3이므로 lr scheduling이 거의 효과가 없었던 듯. 
-
-### 🌟
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 3 | 0.1 | 10 | **0.90974** | 32 |
-
-![image 3](https://github.com/user-attachments/assets/374e472b-cb6a-4afb-8fa7-1c1c09234899)
-
-![image 4](https://github.com/user-attachments/assets/00cd7c05-1633-4064-a0c6-ec7d1673be37)
-
-![image 5](https://github.com/user-attachments/assets/f0a68d80-57b3-4060-b69e-6240b37d8bb0)
-🌟 m-bert.pth: **0.90503**
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 3 | 0.1 | 4 | 0.90238 | 32 |
-
-![image 6](https://github.com/user-attachments/assets/6d5fba5c-dfde-466b-af4a-ec3ca17fd7c8)
+  ## Experiment Results
 
 
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 1 | 0.1 | 4 | 0.89697 | 32 |
-
-![image 7](https://github.com/user-attachments/assets/dfbc1efa-16ba-4580-91f4-6c6a0930f795)
-
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 3 | 0.1 | 10 | 0.89912 | 16 |
-
-![image 8](https://github.com/user-attachments/assets/f7544813-b6dd-4679-9d30-9f808607f5e7)
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 3 | 0.1 | 10 | 0.89540 | 64 |
-
-![image 9](https://github.com/user-attachments/assets/2b1f5dc2-96fb-40eb-b0d5-d48b52b59e87)
-
-배치 사이즈는 32가 적당한 걸로
-
-|  | 사용 여부 | 종류 | base_lr(초기 lr) | step size | gamma | epoch | 최고 성능(eval) | batch size | max_lr | mode |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | CyclicLR | 3e-8 | 3 | 0.5 | 10 | 0.89703 | 32 | 3e-5 | exp_range |
-
-![image 10](https://github.com/user-attachments/assets/4d30bd29-3305-48b9-99c4-d831aaf7496a)
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 5e-5 | 3 | 0.1 | 10 | 0.90132 | 32 |
-
-![image 11](https://github.com/user-attachments/assets/93b84f6f-d3f3-4663-bca0-4632b415469e)
-
-
-### 🌟 Early Stopping 적용해서 과적합 막아보기
-
-|  | 사용 여부 | 종류 | 초기 LR | step size | gamma | epoch | 최고 성능(eval) | batch size |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| lr_scheduler | o | StepLR | 3e-5 | 3 | 0.1 | 10 | 0.90709 | 32 |
-
-|   사용 여부 | patience_check| patience_limit|
+| Model | Average Test Accuracy | Test F1 Score |
 | --- | --- | --- |
-| o | 0 | 3 | 
-
-![image 12](https://github.com/user-attachments/assets/298262d7-edf8-46d4-b6b7-41c9e6c927ff)
+| KLUE/BERT-base | 0.9217 | 0.9032 |
+| Multilingual BERT | 0.9054 | 0.8838 |
 
