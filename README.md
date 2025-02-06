@@ -2,11 +2,11 @@
 
 ## Experiment Results
 
-*acc 기준
 
-|  | Multilingual BERT | KoBERT | KoBERT with LLRD |
+|  | klue/bert-base | multilingual-bert |  |
 | --- | --- | --- | --- |
-| Test | 0.90530 | 0.8976 | 0.8982 |
+| Average Test Accuracy | 0.9217 | 0.9054 |  |
+| Test F1 Score | 0.9032 | 0.8838 |  |
 
 ## #01 프로젝트 소개
 
