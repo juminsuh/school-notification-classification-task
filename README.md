@@ -47,11 +47,11 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 ### Deep Learning Model
 
-### Multilingual BERT
+**Multilingual BERT**
 
 - Multilingual Bert (m-bert) is a pre-trained bert-based model which was trained to understand multiple languages and generalized language representations. It was trained with self-supervised fashion without any ground-truth labels. 
 
-### KLUE-BERT-BASE
+**KLUE-BERT-BASE**
 
 - KLUE (Korean Language Understanding Evaluation) is a collection of benchmarks for 8 Korean NLU tasks and KLUE-BERT-BASE (klue-bert-base) is a pre-trained model with KLUE benchmarks.
 
