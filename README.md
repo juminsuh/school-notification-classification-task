@@ -3,10 +3,10 @@
 ## Experiment Results
 
 
-|  | klue/bert-base | multilingual-bert |  |
-| --- | --- | --- | --- |
-| Average Test Accuracy | 0.9217 | 0.9054 |  |
-| Test F1 Score | 0.9032 | 0.8838 |  |
+|  klue/bert-base | multilingual-bert |  
+| --- | --- | --- |
+| Average Test Accuracy | 0.9217 | 0.9054 |  
+| Test F1 Score | 0.9032 | 0.8838 |  
 
 ## #01 프로젝트 소개
 
