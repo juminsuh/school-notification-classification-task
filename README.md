@@ -32,8 +32,6 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 ### Embedding
 
----
-
 - N-gram Vectorization captures contextual information by considering the surrounding words.
 
 - Utilize the last hidden state (embedding) obtained from KLUE-BERT-Base Tokenizer, which is a pre-trained model, to generate more meaningful embeddings.
@@ -57,8 +55,7 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 - KLUE (Korean Language Understanding Evaluation) is a collection of benchmarks for 8 Korean NLU tasks and KLUE-BERT-BASE (klue-bert-base) is a pre-trained model with KLUE benchmarks.
 
-  ## Experiment Results
-
+### Experiment Results
 
 | Model | Average Test Accuracy | Test F1 Score |
 | --- | --- | --- |
