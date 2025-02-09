@@ -59,6 +59,13 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 ### Experiment Results
 
+* Standard: Validation Set
+  
+| Model | Average Test Accuracy | Test F1 Score |
+| --- | --- | --- |
+| KLUE/BERT-base | 0.9478 | 0.9413 |
+| Multilingual BERT | 0.9353 | 0.9336 |
+
 * Standard: Test Set
 
 | Model | Average Test Accuracy | Test F1 Score |
