@@ -40,6 +40,8 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 
 ### Machine Learning Model
 
+* Standard: Validation Set
+
 | Model | Random Forest | Multinomial Naive Bayes | Bernoulli Naive Bayes | Logistic Regression |
 | --- | --- | --- | --- | --- |
 | **Accuracy** | 0.9183 | 0.9008 | 0.9088 | 0.9321 |
@@ -56,6 +58,8 @@ Defined a title scraping function by using `BeautifulSoup` to extract specific s
 - KLUE (Korean Language Understanding Evaluation) is a collection of benchmarks for 8 Korean NLU tasks and KLUE-BERT-BASE (klue-bert-base) is a pre-trained model with KLUE benchmarks.
 
 ### Experiment Results
+
+* Standard: Test Set
 
 | Model | Average Test Accuracy | Test F1 Score |
 | --- | --- | --- |
